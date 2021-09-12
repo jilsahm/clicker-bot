@@ -7,6 +7,8 @@ fn main() {
             INPUT_TYPE,
             MOUSE_EVENT_FLAGS,
             MOUSEINPUT,
+            KEYBDINPUT,
+            KEYBD_EVENT_FLAGS,
             SendInput,
         },
         Windows::Win32::UI::WindowsAndMessaging::GetCursorPos,

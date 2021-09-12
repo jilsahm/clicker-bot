@@ -2,25 +2,23 @@ use std::{sync::mpsc::Sender, thread, time::Duration};
 
 use bindings::Windows::Win32::UI::KeyboardAndMouseInput::GetAsyncKeyState;
 
-use crate::event::Event;
+use crate::hardware::Key;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Key {
-    Up = 0x26,
-    Down = 0x28,
-}
+pub use self::signal::Signal;
 
-pub struct KeyboardMonitor {
-    signal: (Key, bool),
+mod signal;
+
+pub struct EventGrid {
+    pause: (Key, bool),
     shutdown: Key,
-    tx: Sender<Event>,
+    tx: Sender<Signal>,
 }
 
-impl KeyboardMonitor {
+impl EventGrid {
 
-    pub fn new(tx: Sender<Event>) -> Self {
+    pub fn new(tx: Sender<Signal>) -> Self {
         Self {
-            signal: (Key::Up, false),
+            pause: (Key::Up, false),
             shutdown: Key::Down,
             tx,
         }
@@ -29,19 +27,19 @@ impl KeyboardMonitor {
     pub fn start(mut self) {
         thread::spawn(move || unsafe {
             while GetAsyncKeyState(self.shutdown as i32) == 0 {
-                let state = GetAsyncKeyState(self.signal.0 as i32);
-                if !self.signal.1 && state != 0 {
-                    match self.tx.send(Event::Signal) {
-                        Ok(_) => info!("send signal triggered by {:?}", self.signal.0),
+                let state = GetAsyncKeyState(self.pause.0 as i32);
+                if !self.pause.1 && state != 0 {
+                    match self.tx.send(Signal::Pause) {
+                        Ok(_) => info!("send signal triggered by {:?}", self.pause.0),
                         Err(_) => return error!("signal send failure"),
                     }
-                    self.signal.1 = true;
+                    self.pause.1 = true;
                 } else if state == 0 {
-                    self.signal.1 = false;
+                    self.pause.1 = false;
                 }
                 thread::sleep(Duration::from_millis(20));
             }
-            match self.tx.send(Event::Shutdown) {
+            match self.tx.send(Signal::Shutdown) {
                 Ok(_) => info!("send shutdown triggered by {:?}", self.shutdown),
                 Err(_) => error!("shutdown send failure"),
             }
