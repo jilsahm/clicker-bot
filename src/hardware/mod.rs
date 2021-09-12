@@ -1,0 +1,6 @@
+struct VirtualHardware;
+
+impl VirtualHardware {
+    
+    
+}

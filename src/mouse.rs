@@ -99,10 +99,11 @@ impl VirtualMouse {
                     match Self::current_position() {
                         Ok(point) => Self::click(point),
                         Err(_) => warn!("failed to retrieve mouse position"),
-                    }
-                    thread::sleep(Duration::from_millis(1));
+                    }                    
                 }
+                thread::sleep(Duration::from_millis(1));
             }
+            info!("shutting down clicker worker");
         });
     }
 

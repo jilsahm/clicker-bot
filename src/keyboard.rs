@@ -1,4 +1,4 @@
-use std::{sync::mpsc::Sender, thread};
+use std::{sync::mpsc::Sender, thread, time::Duration};
 
 use bindings::Windows::Win32::UI::KeyboardAndMouseInput::GetAsyncKeyState;
 
@@ -39,7 +39,7 @@ impl KeyboardMonitor {
                 } else if state == 0 {
                     self.signal.1 = false;
                 }
-                thread::yield_now();
+                thread::sleep(Duration::from_millis(20));
             }
             match self.tx.send(Event::Shutdown) {
                 Ok(_) => info!("send shutdown triggered by {:?}", self.shutdown),
