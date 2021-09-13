@@ -2,17 +2,19 @@
 
 use std::{sync::mpsc::channel, time::Duration};
 
-pub use configuration::Configuration;
-use configuration::SubCommand;
+use bindings::Windows::Win32::UI::KeyboardAndMouseInput::GetKeyState;
+pub use config::Configuration;
+use config::SubCommand;
 use mouse::VirtualMouse;
+use replay::Recorder;
 
 use crate::{eventgrid::EventGrid, hardware::Key};
 
-mod command;
-mod configuration;
+mod config;
 mod hardware;
 mod mouse;
 mod eventgrid;
+mod replay;
 
 pub fn run(config: Configuration) {
     match config.subcommand {
@@ -22,7 +24,10 @@ pub fn run(config: Configuration) {
             let mouse = VirtualMouse::new(rx);
             mouse.start();
         },
-        SubCommand::Record => todo!(),
+        SubCommand::Record => {
+            let mut recorder = Recorder::new();
+            recorder.start();
+        },
         SubCommand::Replay => {
             std::thread::sleep(Duration::from_secs(5));
             Key::A.press();

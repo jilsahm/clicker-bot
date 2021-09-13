@@ -18,8 +18,8 @@ impl EventGrid {
 
     pub fn new(tx: Sender<Signal>) -> Self {
         Self {
-            pause: (Key::Up, false),
-            shutdown: Key::Down,
+            pause: (Key::KeyboardUp, false),
+            shutdown: Key::KeyboardDown,
             tx,
         }
     }
