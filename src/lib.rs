@@ -2,7 +2,6 @@
 
 use std::{sync::mpsc::channel, time::Duration};
 
-use bindings::Windows::Win32::UI::KeyboardAndMouseInput::GetKeyState;
 pub use config::Configuration;
 use config::SubCommand;
 use mouse::VirtualMouse;
@@ -24,8 +23,8 @@ pub fn run(config: Configuration) {
             let mouse = VirtualMouse::new(rx);
             mouse.start();
         },
-        SubCommand::Record => {
-            let mut recorder = Recorder::new();
+        SubCommand::Record(config) => {
+            let mut recorder = Recorder::new(config.out_file());
             recorder.start();
         },
         SubCommand::Replay => {

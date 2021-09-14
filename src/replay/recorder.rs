@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread, time::Duration};
+use std::{convert::TryFrom, fs::File, io::BufWriter, path::PathBuf, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread, time::Duration};
 
 use bindings::Windows::Win32::{Foundation::{BOOL, POINT}, UI::{KeyboardAndMouseInput::{GetKeyState, GetKeyboardState}, WindowsAndMessaging::GetCursorPos}};
 
@@ -8,15 +8,17 @@ pub struct Recorder {
     memory: [bool; 256],
     records: Vec<Command>,
     running: Arc<AtomicBool>,
+    out_file: PathBuf,
 }
 
 impl Recorder {
     
-    pub fn new() -> Self {
+    pub fn new(out_file: PathBuf) -> Self {
         Self { 
             memory: [false; 256],
             records: Vec::with_capacity(128),
             running: Arc::new(AtomicBool::from(true)),
+            out_file,
         }
     }
 
@@ -50,7 +52,7 @@ impl Recorder {
             }
         }
         info!("recording stopped");
-        info!("recorder {:?}", self.records);
+        self.flush();
     }
 
     unsafe fn record(&mut self, key: Key) {
@@ -78,5 +80,17 @@ impl Recorder {
             info!("shutting down recorder");
             runnint.store(false, Ordering::Relaxed);
         });
+    }
+
+    fn flush(&self) {
+        info!("writing {} records to {}", self.records.len(), self.out_file.to_string_lossy());
+        match File::create(self.out_file.as_path())
+            .map_err(|e| format!("failed to create file: {:?}", e.kind()))
+            .and_then(|file| Ok(BufWriter::new(file)))
+            .and_then(|writer| serde_yaml::to_writer(writer, &self.records).map_err(|e| e.to_string())) 
+        {
+            Ok(_) => info!("writing finished"),
+            Err(what) => error!("{}", what),
+        }            
     }
 }
