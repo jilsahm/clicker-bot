@@ -81,8 +81,8 @@ impl Recorder {
         thread::spawn(move || {
             while let Ok(signal) = rx.recv() {
                 match signal {
-                    Signal::Pause => (),
                     Signal::Shutdown => break,
+                    _ => (),
                 }
             }
             info!("shutting down recorder");

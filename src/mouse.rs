@@ -45,6 +45,7 @@ impl VirtualMouse {
                         }
                     }
                 }
+                _ => (),
             }
         }
         info!("shutting down virtual mouse");
