@@ -4,14 +4,13 @@ use std::{sync::mpsc::channel, time::Duration};
 
 pub use config::Configuration;
 use config::SubCommand;
-use mouse::VirtualMouse;
+use hardware::VirtualMouse;
 use replay::Recorder;
 
 use crate::{eventgrid::EventGrid, hardware::Key};
 
 mod config;
 mod hardware;
-mod mouse;
 mod eventgrid;
 mod replay;
 
