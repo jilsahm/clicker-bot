@@ -24,7 +24,9 @@ pub fn run(config: Configuration) {
             mouse.start();
         },
         SubCommand::Record(config) => {
-            let mut recorder = Recorder::new(config.out_file());
+            let (tx, rx) = channel();
+            EventGrid::new(tx).start();
+            let mut recorder = Recorder::new(config.out_file(), rx);
             recorder.start();
         },
         SubCommand::Replay => {

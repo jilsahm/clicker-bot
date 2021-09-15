@@ -1,24 +1,26 @@
-use std::{convert::TryFrom, fs::File, io::BufWriter, path::PathBuf, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread, time::Duration};
+use std::{convert::TryFrom, fs::File, io::BufWriter, path::PathBuf, sync::{Arc, atomic::{AtomicBool, Ordering}, mpsc::Receiver}, thread, time::Duration};
 
 use bindings::Windows::Win32::{Foundation::{BOOL, POINT}, UI::{KeyboardAndMouseInput::{GetKeyState, GetKeyboardState}, WindowsAndMessaging::GetCursorPos}};
 
-use crate::{config::Command, hardware::Key};
+use crate::{eventgrid::Signal, hardware::Key, replay::Command};
 
 pub struct Recorder {
     memory: [bool; 256],
     records: Vec<Command>,
     running: Arc<AtomicBool>,
     out_file: PathBuf,
+    rx: Option<Receiver<Signal>>,
 }
 
 impl Recorder {
     
-    pub fn new(out_file: PathBuf) -> Self {
+    pub fn new(out_file: PathBuf, rx: Receiver<Signal>) -> Self {
         Self { 
             memory: [false; 256],
             records: Vec::with_capacity(128),
             running: Arc::new(AtomicBool::from(true)),
             out_file,
+            rx: Some(rx),
         }
     }
 
@@ -73,10 +75,16 @@ impl Recorder {
         }
     }
 
-    fn worker(&self) {
+    fn worker(&mut self) {
+        let rx = self.rx.take().expect("receiver present");
         let runnint = self.running.clone();
         thread::spawn(move || {
-            thread::sleep(Duration::from_secs(10));
+            while let Ok(signal) = rx.recv() {
+                match signal {
+                    Signal::Pause => (),
+                    Signal::Shutdown => break,
+                }
+            }
             info!("shutting down recorder");
             runnint.store(false, Ordering::Relaxed);
         });

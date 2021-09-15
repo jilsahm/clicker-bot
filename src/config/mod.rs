@@ -2,10 +2,6 @@ use std::{path::PathBuf, time::SystemTime};
 
 use clap::Clap;
 
-mod command;
-
-pub use command::Command;
-
 #[derive(Clap)]
 #[clap(
     about = "CLI tool for running a simple clicker bot",
