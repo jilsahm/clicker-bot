@@ -2,7 +2,6 @@ fn main() {
     windows::build!(
         Windows::Win32::Foundation::POINT,
         Windows::Win32::UI::KeyboardAndMouseInput::{
-            GetAsyncKeyState,
             GetKeyState,
             GetKeyboardState,
             INPUT,
