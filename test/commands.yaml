@@ -1,0 +1,10 @@
+loops: infinite
+commands:
+  - mouse:
+        key: left
+        x: 0
+        y: 0
+  - sleep:
+        millis: 1000
+  - keyboard:
+        key: a
