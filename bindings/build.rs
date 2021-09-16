@@ -12,6 +12,9 @@ fn main() {
             KEYBD_EVENT_FLAGS,
             SendInput,
         },
-        Windows::Win32::UI::WindowsAndMessaging::GetCursorPos,
+        Windows::Win32::UI::WindowsAndMessaging::{
+            GetCursorPos,
+            SetCursorPos,
+        },
     );
 }

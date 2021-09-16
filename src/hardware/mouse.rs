@@ -1,6 +1,6 @@
 use std::{sync::{Arc, atomic::{AtomicBool, Ordering}, mpsc::Receiver}, thread, time::Duration};
 
-use bindings::Windows::Win32::{Foundation::{BOOL, POINT}, UI::{KeyboardAndMouseInput::{INPUT, INPUT_0, MOUSEINPUT, MOUSE_EVENT_FLAGS, SendInput}, WindowsAndMessaging::GetCursorPos}};
+use bindings::Windows::Win32::{Foundation::{BOOL, POINT}, UI::{KeyboardAndMouseInput::{INPUT, INPUT_0, MOUSEINPUT, MOUSE_EVENT_FLAGS, SendInput}, WindowsAndMessaging::{GetCursorPos, SetCursorPos}}};
 
 use crate::eventgrid::Signal;
 
@@ -45,7 +45,10 @@ impl Mouse {
 
     pub fn trigger(&self, position: &POINT) {
         let input = &mut self.prepare_input(position);
-        unsafe { SendInput(1, input, std::mem::size_of::<INPUT>() as i32); }
+        unsafe {             
+            SetCursorPos(position.x, position.y);
+            SendInput(1, input, std::mem::size_of::<INPUT>() as i32); 
+        }
     }
 
     fn prepare_input(&self, position: &POINT) -> INPUT {

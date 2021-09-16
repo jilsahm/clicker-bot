@@ -28,7 +28,18 @@ impl Replayer {
         while let Ok(event) = self.rx.recv() {
             match event {
                 Signal::Input(_) => (),
-                Signal::Pause => self.paused.store(self.paused.load(Ordering::Acquire), Ordering::Release),
+                Signal::Pause => {
+                    match self.paused.load(Ordering::Acquire) {
+                        true => {
+                            self.paused.store(false, Ordering::Release);
+                            info!("resume");
+                        }
+                        false => {
+                            self.paused.store(true, Ordering::Release);
+                            info!("pause");
+                        }
+                    }
+                },
                 Signal::Shutdown => break,
             }
         }
@@ -69,6 +80,7 @@ impl Replayer {
                             },
                             super::Command::SleepCommand { millis } => thread::sleep(Duration::from_millis(*millis)),
                         }
+                        thread::sleep(Duration::from_millis(1));
                     }
                 });
         });
