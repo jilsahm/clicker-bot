@@ -82,7 +82,7 @@ impl VirtualMouse {
     }
 
     pub fn start(&self) {
-        info!("stating virtual mouse");
+        info!("stating virtual mouse, pause/unpause with UP");
         self.worker();
         while self.running.load(Ordering::Relaxed) {
             match self.rx.recv() {
@@ -98,11 +98,11 @@ impl VirtualMouse {
                     match self.fire.load(Ordering::Acquire) {
                         true => {
                             self.fire.store(false, Ordering::Release);
-                            info!("going idle");
+                            info!("going pause");
                         }
                         false => {
                             self.fire.store(true, Ordering::Release);
-                            info!("going fire mode");
+                            info!("going unpause");
                         }
                     }
                 }
