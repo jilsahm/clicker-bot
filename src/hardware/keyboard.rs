@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 use bindings::Windows::Win32::UI::KeyboardAndMouseInput::{INPUT, INPUT_0, KEYBDINPUT, KEYBD_EVENT_FLAGS, SendInput};
 
 use super::InputType;
 
+#[allow(dead_code)]
 enum KeyState {
     Pressed = 0x0000,
     Released = 0x0002,
@@ -17,7 +19,7 @@ impl Into<KEYBD_EVENT_FLAGS> for KeyState {
 }
 
 #[allow(dead_code)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Hash, Serialize)]
 pub enum Key {
     MouseLeft = 0x01,
     MouseRight = 0x02,

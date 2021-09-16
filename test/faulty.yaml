@@ -1,7 +1,7 @@
 loops: Infinite
 commands:
   - mouse:
-        key: MouseLeft
+        key: B
         x: 0
         y: 0
   - sleep:

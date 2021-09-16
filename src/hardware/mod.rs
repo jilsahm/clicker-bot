@@ -4,7 +4,7 @@ mod keyboard;
 mod mouse;
 
 pub use keyboard::Key;
-pub use mouse::Mouse;
+pub use mouse::{Mouse, VirtualMouse};
 
 #[allow(dead_code)]
 pub enum InputType {

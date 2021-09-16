@@ -1,38 +1,36 @@
 #[macro_use] extern crate log;
 
-use std::{sync::mpsc::channel, time::Duration};
+use std::sync::mpsc::channel;
 
 pub use config::Configuration;
 use config::SubCommand;
-use mouse::VirtualMouse;
-use replay::Recorder;
+use hardware::VirtualMouse;
+use replay::{Recorder, Replayer};
 
-use crate::{eventgrid::EventGrid, hardware::Key};
+use crate::eventgrid::EventGrid;
 
 mod config;
 mod hardware;
-mod mouse;
 mod eventgrid;
 mod replay;
 
 pub fn run(config: Configuration) {
+    let (tx, rx) = channel();
+    EventGrid::new(tx).start();
     match config.subcommand {
-        SubCommand::Click => {
-            let (tx, rx) = channel();
-            EventGrid::new(tx).start();
+        SubCommand::Click => {            
             let mouse = VirtualMouse::new(rx);
             mouse.start();
         },
         SubCommand::Record(config) => {
-            let (tx, rx) = channel();
-            EventGrid::new(tx).start();
             let mut recorder = Recorder::new(config.out_file(), rx);
             recorder.start();
         },
-        SubCommand::Replay => {
-            std::thread::sleep(Duration::from_secs(5));
-            Key::A.press();
-            Key::A.release();
+        SubCommand::Replay(config) => {
+            let commands = config.load_replay();
+            info!("loaded replay file with '{}' commands", commands.iter_commands().count());
+            let mut replayer = Replayer::new(commands, rx);
+            replayer.start();
         },
     }    
 }
